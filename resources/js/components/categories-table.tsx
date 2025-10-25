@@ -1,15 +1,17 @@
 import { type Category } from '@/types/accounts';
 import { Link, router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
-function handleDelete(id) {
+function handleDelete(id: number) {
     if(confirm("Are you sure you want to delete this category type?")) {
         router.delete(`/categories/${id}`, {
             onSuccess: () => {
-                console.log('success deletion')
+                toast.success('account deleted successfully!')
             },
             onError: (error) => {
-                console.error(error)
+               toast.error('Failed to delete accounts');
+               console.error(error);
             },
         })
     }
@@ -20,7 +22,22 @@ type CategoryTableProps = {
 }
 
 export function CategoryTable({ categories }: CategoryTableProps) {
+    function handleDelete(id: number) {
+    if(confirm("Are you sure you want to delete this category?")) {
+      router.delete(`/categories/${id}`, {
+        onSuccess: () => {
+          toast.success('Category deleted successfully!');
+        },
+        onError: (error) => {
+          toast.error('Failed to delete category');
+          console.error(error);
+        },
+      })
+    }
+  }
     return (
+        <>
+        <Toaster position="bottom-right" />
         <div className="px-4 sm:px-6 lg:px-8">
             <div className="sm:flex sm:items-center">
                 <div className="sm:flex-auto">
@@ -55,7 +72,7 @@ export function CategoryTable({ categories }: CategoryTableProps) {
                                     {categories.length === 0 ? (
                                         <tr>
                                             <td colSpan={5} className="py-6 text-center text-sm text-gray-500">
-                                                No accounts yet.
+                                                No categories yet.
                                             </td>
                                         </tr>
                                     ) : (
@@ -88,5 +105,6 @@ export function CategoryTable({ categories }: CategoryTableProps) {
                 </div>
             </div>
         </div>
+        </>
     )
 }

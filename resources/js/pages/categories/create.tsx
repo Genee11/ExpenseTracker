@@ -1,4 +1,5 @@
 import { useForm, Link } from '@inertiajs/react'
+import toast, { Toaster } from 'react-hot-toast'
 
 export type Category = {
   id: number
@@ -18,9 +19,16 @@ export default function Create({ accounts }: CategoriesCreateProps) {
   })
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    post('/categories')
-  }
+  e.preventDefault()
+  post('/categories', {
+    onSuccess: () => {
+      toast.success('Category added successfully!');
+    },
+    onError: () => {
+      toast.error('Failed to add category');
+    }
+  })
+}
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto py-10">

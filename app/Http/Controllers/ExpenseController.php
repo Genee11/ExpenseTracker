@@ -6,22 +6,28 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\Expense;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ExpenseController extends Controller
 {
     public function index()
     {
-        $expense = Expense::with( 'category', 'account')->get();
+        // Only get expenses for the authenticated user
+        $expenses = Expense::where('user_id', Auth::id())
+            ->with('category', 'account')
+            ->latest()
+            ->get();
+
         return Inertia::render('expenses/index', [
-            'expenses' => $expense,
+            'expenses' => $expenses,
         ]);
     }
 
     public function create()
     {
-        $accounts = Account::all();
-        $categories = Category::all();
+        $accounts = Account::where('user_id', Auth::id())->get();
+        $categories = Category::where('user_id', Auth::Id())->get();
         return Inertia::render('expenses/create', [
             'accounts' => $accounts,
             'categories' => $categories,
@@ -37,14 +43,21 @@ class ExpenseController extends Controller
             'amount' => ['required'],
         ]);
 
-        $expense = Expense::create($validated);
+        Expense::create([
+            ...$validated,
+            'user_id' => Auth::id(),
+        ]);
         return to_route('expenses.index');
     }
 
     public function edit(Expense $expense)
     {
-        $accounts = Account::all();
-        $categories = Category::all();
+
+        if ($expense->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+        $accounts = Account::where('user_id', Auth::id())->get();
+        $categories = Category::where('user_id', Auth::Id())->get();
         return Inertia::render('expenses/edit', [
             'expense' => $expense,
             'accounts' => $accounts,
@@ -54,6 +67,9 @@ class ExpenseController extends Controller
 
     public function update(Request $request, Expense $expense)
     {
+        if ($expense->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
         $validated = $request->validate([
             'account_id' => ['required', 'exists:accounts,id'],
             'category_id' => ['required', 'exists:categories,id'],
@@ -67,6 +83,9 @@ class ExpenseController extends Controller
 
     public function destroy(Expense $expense)
     {
+        if ($expense->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
         $expense->delete(); // safe
         return to_route('expenses.index')->with('success', 'Expense deleted.');
     }

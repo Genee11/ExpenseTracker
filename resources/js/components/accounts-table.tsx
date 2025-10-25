@@ -1,26 +1,31 @@
 import { type Account } from '@/types/accounts';
 import { Link, router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
-function handleDelete(id) {
-    if(confirm("Are you sure you want to delete this account type?")) {
-        router.delete(`/accounts/${id}`, {
-            onSuccess: () => {
-                console.log('success deletion')
-            },
-            onError: (error) => {
-                console.error(error)
-            },
-        })
-    }
-}
 
 type AccountTableProps = {
     accounts: Account[];
 }
 
 export function AccountTable({ accounts }: AccountTableProps) {
+    function handleDelete(id: number) {
+    if(confirm("Are you sure you want to delete this account?")) {
+      router.delete(`/accounts/${id}`, {
+        onSuccess: () => {
+          toast.success('Account deleted successfully!');
+        },
+        onError: (error) => {
+          toast.error('Failed to delete account');
+          console.error(error);
+        },
+      })
+    }
+  }
     return (
+    <>
+        <Toaster position="bottom-right" />
+
         <div className="px-4 sm:px-6 lg:px-8">
             <div className="sm:flex sm:items-center">
                 <div className="sm:flex-auto">
@@ -88,5 +93,6 @@ export function AccountTable({ accounts }: AccountTableProps) {
                 </div>
             </div>
         </div>
+        </>
     )
 }

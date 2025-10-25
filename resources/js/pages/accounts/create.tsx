@@ -1,4 +1,5 @@
 import { useForm, Link } from '@inertiajs/react'
+import toast, { Toaster } from 'react-hot-toast'
 
 export type Account = {
   id: number
@@ -21,11 +22,21 @@ export default function Create({ accounts }: AccountCreateProps) {
   })
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    post('/accounts')
-  }
+  e.preventDefault()
+  post('/accounts', {
+    onSuccess: () => {
+      toast.success('Account added successfully!');
+    },
+    onError: () => {
+      toast.error('Failed to add account');
+    }
+  })
+}
 
   return (
+    <>
+      <Toaster position="top-right" />
+
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto py-10">
       <div className="space-y-12 sm:space-y-16">
         {/* Header */}
@@ -74,5 +85,6 @@ export default function Create({ accounts }: AccountCreateProps) {
         </button>
       </div>
     </form>
+    </>
   )
 }
